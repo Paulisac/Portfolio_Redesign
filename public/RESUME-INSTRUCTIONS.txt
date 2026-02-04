@@ -1,0 +1,16 @@
+RESUME SETUP INSTRUCTIONS
+=========================
+
+To make the "Download Resume" button work:
+
+1. Place your resume PDF file in this directory (public/)
+2. Name it exactly: resume.pdf
+3. Rebuild the project: npm run build
+4. Deploy: npm run deploy
+
+Your resume will then be downloadable from the About section.
+
+If you want to use a different filename:
+- Edit src/pages/Home.jsx
+- Find the line: <a href="/resume.pdf" download
+- Change "resume.pdf" to your filename
