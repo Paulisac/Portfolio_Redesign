@@ -37,8 +37,8 @@ export default function Home() {
         <div className="hero-inner">
           <div className="hero-text">
             <div className="hero-tag">UX · Visual · Motion</div>
-            <h1>I design products<br/>by removing<br/>the noise.</h1>
-            <p className="hero-sub">UX, visual, and motion design focused on clarity, flow, and real human behavior — not trends.</p>
+            <h1>Designing <br/> digital products <br/> with intention.</h1>
+            <p className="hero-sub">UX, visual, and motion design focused on clarity, flow, and real human behavior.</p>
             <p className="hero-since">Freelance designer since April 2024.</p>
             <div className="hero-ctas">
               <button onClick={() => scrollToSection('work')} className="btn btn-primary">
@@ -89,7 +89,7 @@ export default function Home() {
         </div>
         <div className="work-grid">
           {/* B2B Browse */}
-          <Link to="/work/b2b" className="work-card reveal" data-project="b2b">
+          <Link to="/work/browse" className="work-card reveal" data-project="browse">
             <div className="work-card-vis">
               <svg viewBox="0 0 72 72" fill="none" stroke="#8C7B6B" strokeWidth="1.2">
                 <rect x="8" y="18" width="56" height="36" rx="3"/>
@@ -101,9 +101,9 @@ export default function Home() {
             </div>
             <div className="work-card-body">
               <div className="work-card-meta">Walmart <span className="badge">Client</span></div>
-              <h3>B2B Browse Journey</h3>
+              <h3>B2B Search Experience</h3>
               <div className="work-card-outcome">
-                Streamlined B2B product discovery — 30% efficiency gain <span className="arrow">→</span>
+                Improved product discovery efficiency by 30% <span className="arrow">→</span>
               </div>
             </div>
           </Link>
@@ -124,7 +124,7 @@ export default function Home() {
               <div className="work-card-meta">Amnet Digital <span className="badge">Client</span></div>
               <h3>My Insights Portal</h3>
               <div className="work-card-outcome">
-                Report configuration 40% simpler for analysts <span className="arrow">→</span>
+                Unified enterprise reports with 40% less complexity <span className="arrow">→</span>
               </div>
             </div>
           </Link>
@@ -266,7 +266,7 @@ export default function Home() {
           <div className="expect-left reveal">
             <div className="section-label">Working with me</div>
             <h2 className="section-title">What you<br/>can expect.</h2>
-            <p className="section-desc">No surprises. No jargon. Just honest work done well.</p>
+            <p className="section-desc">Simple process. Clear thinking. Real collaboration.</p>
           </div>
           <ul className="expect-list reveal">
             <li>
@@ -274,8 +274,8 @@ export default function Home() {
                 <path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 4v4l3 2"/>
               </svg>
               <div>
-                <strong>Clear thinking over flashy visuals</strong>
-                <span>The goal is understanding, not decoration. Every choice has a reason.</span>
+                <strong>Clear thinking</strong>
+                <span>Every element exists for a reason, nothing added without intent.</span>
               </div>
             </li>
             <li>
@@ -283,8 +283,8 @@ export default function Home() {
                 <path d="M3 10h14M10 3l7 7-7 7"/>
               </svg>
               <div>
-                <strong>Honest feedback and collaboration</strong>
-                <span>I'll tell you what I think, not what sounds good. That's the job.</span>
+                <strong>Open dialogue</strong>
+                <span>I value clarity in conversation as much as clarity in design.</span>
               </div>
             </li>
             <li>
@@ -294,7 +294,7 @@ export default function Home() {
                 <line x1="8" y1="3" x2="8" y2="17"/>
               </svg>
               <div>
-                <strong>Systems that scale, not just screens</strong>
+                <strong>Designed as a system</strong>
                 <span>I design for the product as a whole — components, states, edge cases.</span>
               </div>
             </li>

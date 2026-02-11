@@ -322,7 +322,7 @@ nav.scrolled { box-shadow: 0 1px 12px rgba(26,26,24,.06); }
   overflow:hidden;
 }
 /* per-project tints */
-.work-card[data-project="b2b"]   .work-card-vis { background:#E8E0D4; }
+.work-card[data-project="browse"]   .work-card-vis { background:#E8E0D4; }
 .work-card[data-project="insights"] .work-card-vis { background:#D9DEE3; }
 .work-card[data-project="taksh"] .work-card-vis { background:#E2DCD4; }
 .work-card[data-project="mechanic"] .work-card-vis { background:#DFE0DA; }
@@ -376,7 +376,7 @@ nav.scrolled { box-shadow: 0 1px 12px rgba(26,26,24,.06); }
 .approach-steps::before {
   content:'';
   position:absolute;
-  top:1.6rem; left:12%; right:12%;
+  top:1.2rem; left:0%; right:20%;
   height:1px;
   background:var(--line);
   z-index:0;

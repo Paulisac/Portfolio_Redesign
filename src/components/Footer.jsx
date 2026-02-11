@@ -8,6 +8,7 @@ export default function Footer() {
         <div className="footer-links">
           <a href="mailto:luapteg@gmail.com">Email</a>
           <a href="https://www.linkedin.com/in/paul-isac-16213a148/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://www.behance.net/luapteg" target="_blank" rel="noopener noreferrer">Behance</a>
           <a href="https://dribbble.com/luapteg" target="_blank" rel="noopener noreferrer">Dribbble</a>
         </div>
       </div>
