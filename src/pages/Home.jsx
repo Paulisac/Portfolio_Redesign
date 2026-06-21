@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
@@ -30,6 +31,34 @@ export default function Home() {
 
   return (
     <>
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "@id": "https://paulisac.com/#organization",
+              "name": "Paul Isac",
+              "url": "https://paulisac.com",
+              "logo": "https://paulisac.com/og.png",
+              "sameAs": [
+                "https://www.linkedin.com/in/paul-isac-16213a148/",
+                "https://www.behance.net/luapteg",
+                "https://dribbble.com/luapteg"
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "url": "https://paulisac.com",
+              "name": "Paul Isac — Designer",
+              "publisher": {
+                "@id": "https://paulisac.com/#organization"
+              }
+            }
+          ])}
+        </script>
+      </Helmet>
       <Navigation />
       <ScrollToTop />
 

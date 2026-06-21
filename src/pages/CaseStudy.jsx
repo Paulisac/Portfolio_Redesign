@@ -25,6 +25,28 @@ export default function CaseStudy() {
         <meta property="og:type" content="article" />
         <meta property="og:image" content={project.thumbnail || 'https://paulisac.com/og.png'} />
         <link rel="canonical" href={`https://paulisac.com/work/${project.id}`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": project.title,
+            "image": project.thumbnail || 'https://paulisac.com/og.png',
+            "author": {
+              "@type": "Person",
+              "name": "Paul Isac"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Paul Isac",
+              "logo": { "@type": "ImageObject", "url": "https://paulisac.com/og.png" }
+            },
+            "description": project.shortDescription,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://paulisac.com/work/${project.id}`
+            }
+          })}
+        </script>
       </Helmet>
       <Navigation />
       <ScrollToTop />
