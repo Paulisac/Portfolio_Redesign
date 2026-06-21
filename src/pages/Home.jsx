@@ -32,6 +32,17 @@ export default function Home() {
   return (
     <>
       <Helmet>
+        <title>Paul Isac — Designer</title>
+        <meta name="description" content="UX, visual, and motion design focused on clarity, flow, and real human behavior." />
+        <link rel="canonical" href="https://paulisac.com/" />
+        <meta property="og:title" content="Paul Isac — Designer" />
+        <meta property="og:description" content="UX, visual, and motion design focused on clarity, flow, and real human behavior — not trends." />
+        <meta property="og:url" content="https://paulisac.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://paulisac.com/og.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Paul Isac — Designer" />
+        <meta name="twitter:description" content="UX, visual, and motion design focused on clarity, flow, and real human behavior." />
         <script type="application/ld+json">
           {JSON.stringify([
             {
