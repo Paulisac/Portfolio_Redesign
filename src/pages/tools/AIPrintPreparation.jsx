@@ -16,6 +16,19 @@ export default function AIPrintPreparation() {
         <meta property="og:description" content="Prepare artwork for print with DPI checks, CMYK preview, and press-ready export." />
         <meta property="og:type" content="website" />
         <link rel="canonical" href="https://paulisac.com/tools/ai-print-preparation-assistant" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "AI Print Preparation Assistant",
+            "url": "https://paulisac.com/tools/ai-print-preparation-assistant",
+            "description": "AI assistant to prepare artwork for print: DPI analysis, CMYK conversion preview, and press-ready PDF/TIFF export.",
+            "applicationCategory": "DesignTool",
+            "operatingSystem": "Web",
+            "author": { "@type": "Person", "name": "Paul Isac" },
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+          })}
+        </script>
       </Helmet>
       <Navigation />
       <ScrollToTop />
