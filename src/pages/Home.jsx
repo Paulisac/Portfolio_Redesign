@@ -4,6 +4,7 @@ import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
 import ScrollToTop from '../components/ScrollToTop'
 import HeroAnimation from '../components/HeroAnimation'
+import tools from '../data/tools'
 
 export default function Home() {
   useEffect(() => {
@@ -170,6 +171,34 @@ export default function Home() {
               </div>
             </div>
           </Link>
+        </div>
+      </section>
+
+      {/* TOOLS */}
+      <section className="section" id="tools">
+        <div className="work-header reveal">
+          <div className="section-label">Tools</div>
+          <h2 className="section-title">Useful tools.<br/>Experiments & helpers.</h2>
+        </div>
+        <div className="work-grid">
+          {tools.map(tool => (
+            <Link key={tool.id} to={tool.route} className="work-card reveal" data-tool={tool.id}>
+              <div className="work-card-vis">
+                <svg viewBox="0 0 72 72" fill="none" stroke="#8C7B6B" strokeWidth="1.2">
+                  <rect x="12" y="14" width="48" height="44" rx="4"/>
+                  <line x1="12" y1="26" x2="60" y2="26"/>
+                  <circle cx="36" cy="42" r="7"/>
+                </svg>
+              </div>
+              <div className="work-card-body">
+                <div className="work-card-meta">Tool</div>
+                <h3>{tool.title}</h3>
+                <div className="work-card-outcome">
+                  {tool.description} <span className="arrow">→</span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 

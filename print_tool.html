@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Print Ready – CMYK</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a0a;color:#ddd;min-height:100vh}
+.app{max-width:940px;margin:0 auto;padding:16px}
+header{text-align:center;padding:14px 0 20px}
+header h1{font-size:1.42rem;font-weight:800;background:linear-gradient(90deg,#00e5ff,#ff4081,#ffea00,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{color:#555;font-size:.78rem;margin-top:3px}
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.sdot{display:flex;flex-direction:column;align-items:center;gap:4px}
+.sc{width:32px;height:32px;border-radius:50%;border:2px solid #222;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;background:#111;color:#444;transition:.25s}
+.sdot.active .sc{border-color:#00e5ff;background:#00e5ff;color:#000}
+.sdot.done .sc{border-color:#00c853;background:#00c853;color:#000}
+.sl{font-size:.6rem;color:#444;white-space:nowrap}
+.sdot.active .sl{color:#00e5ff}
+.sdot.done .sl{color:#00c853}
+.sline{flex:1;height:2px;background:#1e1e1e;max-width:44px;margin-bottom:15px}
+.card{background:#141414;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:14px}
+.ct{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+.drop{border:2px dashed #2a2a2a;border-radius:10px;padding:34px 20px;text-align:center;transition:.2s}
+.drop.over{border-color:#00e5ff;background:rgba(0,229,255,.04)}
+.drop-ico{font-size:2rem;margin-bottom:7px}
+.drop h3{color:#ccc;margin-bottom:4px;font-size:.92rem}
+.drop p{color:#555;font-size:.78rem}
+.brw{margin-top:11px;padding:7px 18px;border-radius:8px;border:1px solid #00e5ff;background:rgba(0,229,255,.09);color:#00e5ff;cursor:pointer;font-size:.8rem;font-weight:600}
+#prevImg{max-width:100%;max-height:200px;border-radius:8px;margin-top:12px;display:none}
+.meta{background:#0e0e0e;border:1px solid #1e1e1e;border-radius:8px;padding:10px;margin-top:11px;display:none}
+.mr{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
+.mr:last-child{margin:0}
+.mr span:first-child{color:#555}.mr span:last-child{color:#ccc}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:4px 12px;border-radius:20px;border:1px solid #282828;background:transparent;color:#666;cursor:pointer;font-size:.77rem;transition:.2s}
+.tab.active{border-color:#00e5ff;background:rgba(0,229,255,.09);color:#00e5ff}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.sbtn{padding:9px 6px;border-radius:8px;border:1px solid #222;background:#0e0e0e;color:#888;cursor:pointer;text-align:center;transition:.2s;font-size:.74rem;line-height:1.4}
+.sbtn:hover{border-color:#383838;color:#ccc}
+.sbtn.sel{border-color:#00e5ff;background:rgba(0,229,255,.09);color:#00e5ff}
+.sbtn .sn{font-weight:700;display:block}.sbtn .sd{font-size:.64rem;color:#555;display:block}
+.sbtn.sel .sd{color:#4dd0e1}
+.crow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:11px}
+.crow input,.crow select{padding:6px 8px;border-radius:6px;border:1px solid #282828;background:#0e0e0e;color:#ccc;font-size:.78rem}
+.crow input{width:80px}.crow label{color:#555;font-size:.78rem}
+.fp{margin-top:14px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:10px;padding:13px;display:none}
+.fp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.fp-label{font-size:.76rem;color:#888;font-weight:600}
+.fmodes{display:flex;gap:5px}
+.fmbtn{padding:4px 11px;border-radius:6px;border:1px solid #222;background:#111;color:#666;cursor:pointer;font-size:.73rem;transition:.2s}
+.fmbtn.sel{border-color:#00e5ff;background:rgba(0,229,255,.09);color:#00e5ff}
+.orow{display:flex;gap:6px;margin-bottom:10px}
+.obtn{padding:5px 12px;border-radius:8px;border:1px solid #222;background:#0e0e0e;color:#666;cursor:pointer;font-size:.78rem;transition:.2s}
+.obtn.sel{border-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,.08)}
+#fitC{display:block;margin:0 auto;border-radius:6px;max-width:100%}
+.finfo{text-align:center;font-size:.69rem;color:#555;margin-top:7px}
+.drow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.dbtn{padding:6px 11px;border-radius:8px;border:1px solid #222;background:#0e0e0e;color:#777;cursor:pointer;font-size:.77rem;transition:.2s;text-align:center;line-height:1.4}
+.dbtn:hover{border-color:#383838;color:#ccc}
+.dbtn.sel{border-color:#00e5ff;background:rgba(0,229,255,.09);color:#00e5ff}
+.dbtn small{display:block;font-size:.64rem;color:#444;margin-top:1px}
+.dbtn.sel small{color:#4dd0e1}
+.dinfo{background:#0e0e0e;border:1px solid #1e1e1e;border-radius:8px;padding:11px}
+.dr{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
+.dr:last-child{margin:0}
+.dr span:first-child{color:#555}.dr span:last-child{color:#ccc;font-weight:500}
+.warn{margin-top:9px;padding:8px 11px;border-radius:8px;background:rgba(255,152,0,.08);border:1px solid rgba(255,152,0,.22);color:#ff9800;font-size:.75rem;display:none}
+.channels{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:8px}
+.chwrap{text-align:center}
+.chwrap canvas{width:100%;height:auto;border-radius:6px;display:block}
+.chl{font-size:.64rem;margin-top:4px;font-weight:700;padding:2px 5px;border-radius:4px;display:inline-block}
+.c-c{background:rgba(0,229,255,.15);color:#00e5ff}
+.c-m{background:rgba(255,64,129,.15);color:#ff4081}
+.c-y{background:rgba(255,234,0,.15);color:#ffea00}
+.c-k{background:rgba(200,200,200,.12);color:#aaa}
+.c-comp{background:rgba(255,255,255,.07);color:#fff}
+.proc{text-align:center;padding:32px}
+.spin{width:36px;height:36px;border:3px solid #222;border-top-color:#00e5ff;border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.proc p{color:#555;font-size:.82rem}
+.esum{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:13px}
+.ei{background:#0e0e0e;border:1px solid #1e1e1e;border-radius:8px;padding:10px}
+.ei .el{font-size:.67rem;color:#444;margin-bottom:3px}
+.ei .ev{font-size:.84rem;color:#ccc;font-weight:600}
+.fmts{display:flex;gap:6px;margin-bottom:12px}
+.fbtn{padding:6px 14px;border-radius:8px;border:1px solid #222;background:#0e0e0e;color:#777;cursor:pointer;font-size:.79rem;font-weight:600;transition:.2s}
+.fbtn:hover{border-color:#383838;color:#ccc}
+.fbtn.sel{border-color:#00e5ff;background:rgba(0,229,255,.09);color:#00e5ff}
+.expbtn{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,#00e5ff,#0097a7);color:#000;font-size:.93rem;font-weight:800;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.expbtn:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(0,229,255,.28)}
+.expbtn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.expnote{font-size:.68rem;color:#383838;margin-top:7px;text-align:center}
+.exout{margin-top:14px;display:none}
+.exout-label{font-size:.77rem;color:#888;margin-bottom:8px;line-height:1.5}
+.dl-btn{display:inline-block;padding:9px 18px;border-radius:8px;background:#00e5ff;color:#000;font-weight:700;font-size:.83rem;text-decoration:none;margin-bottom:10px;cursor:pointer}
+.pdf-frame{width:100%;height:300px;border:1px solid #2a2a2a;border-radius:8px;display:block;margin-top:8px}
+.tif-note{font-size:.73rem;color:#888;margin-bottom:8px;padding:8px 10px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:6px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:13px}
+.bbk,.bnx{padding:8px 19px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s;border:none}
+.bbk{background:#181818;color:#666;border:1px solid #2a2a2a}
+.bbk:hover:not(:disabled){color:#ccc;border-color:#444}
+.bbk:disabled{opacity:.2;cursor:default}
+.bnx{background:#00e5ff;color:#000}
+.bnx:hover:not(:disabled){background:#00cfea}
+.bnx:disabled{opacity:.32;cursor:default}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.64rem;font-weight:700;background:rgba(0,200,83,.15);color:#00c853;margin-left:8px;vertical-align:middle}
+.hidden{display:none!important}
+.panel{animation:fi .22s ease}
+@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🖨 RGB (AI) Image → Print Ready <span class="badge">True CMYK</span></h1>
+    <p>Upload · Select Size · Set DPI · CMYK Preview · Export Press-Ready PDF</p>
+  </header>
+
+  <div class="steps" id="stepsBar">
+    <div class="sdot active" data-s="1"><div class="sc">1</div><div class="sl">Upload</div></div>
+    <div class="sline"></div>
+    <div class="sdot" data-s="2"><div class="sc">2</div><div class="sl">Print Size</div></div>
+    <div class="sline"></div>
+    <div class="sdot" data-s="3"><div class="sc">3</div><div class="sl">DPI</div></div>
+    <div class="sline"></div>
+    <div class="sdot" data-s="4"><div class="sc">4</div><div class="sl">CMYK</div></div>
+    <div class="sline"></div>
+    <div class="sdot" data-s="5"><div class="sc">5</div><div class="sl">Export</div></div>
+  </div>
+
+  <!-- Step 1 -->
+  <div id="p1" class="panel">
+    <div class="card">
+      <div class="ct">📁 Upload Image</div>
+      <div class="drop" id="drop">
+        <div id="dprompt">
+          <div class="drop-ico">🖼</div>
+          <h3>Drag & drop your image here</h3>
+          <p>PNG · JPG · WebP · AVIF · any format</p>
+          <button class="brw" onclick="document.getElementById('fi').click()">Browse File</button>
+        </div>
+        <img id="prevImg" alt="preview">
+      </div>
+      <input type="file" id="fi" accept="image/*" style="display:none">
+      <div class="meta" id="meta">
+        <div class="mr"><span>File</span><span id="mName">—</span></div>
+        <div class="mr"><span>Dimensions</span><span id="mDim">—</span></div>
+        <div class="mr"><span>Size</span><span id="mSz">—</span></div>
+      </div>
+    </div>
+    <div class="nav"><button class="bbk" disabled>← Back</button><button class="bnx" id="n1" disabled>Next →</button></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="p2" class="panel hidden">
+    <div class="card">
+      <div class="ct">📐 Select Print Size</div>
+      <div class="tabs">
+        <button class="tab active" data-cat="std">Standard</button>
+        <button class="tab" data-cat="ban">Banner</button>
+        <button class="tab" data-cat="cus">Custom</button>
+      </div>
+      <div id="cat-std"><div class="sgrid" id="stdG"></div></div>
+      <div id="cat-ban" class="hidden"><div class="sgrid" id="banG"></div></div>
+      <div id="cat-cus" class="hidden">
+        <div class="crow">
+          <label>W</label><input type="number" id="cW" placeholder="Width" min="1">
+          <label>H</label><input type="number" id="cH" placeholder="Height" min="1">
+          <select id="cU"><option value="mm">mm</option><option value="in">inches</option><option value="cm">cm</option><option value="ft">feet</option></select>
+        </div>
+      </div>
+      <div class="fp" id="fp">
+        <div class="fp-top">
+          <span class="fp-label">🔍 Print Preview</span>
+          <div class="fmodes">
+            <button class="fmbtn sel" data-fm="fit">Fit</button>
+            <button class="fmbtn" data-fm="fill">Fill</button>
+            <button class="fmbtn" data-fm="stretch">Stretch</button>
+          </div>
+        </div>
+        <div class="orow">
+          <button class="obtn sel" id="oP">◻ Portrait</button>
+          <button class="obtn" id="oL">▭ Landscape</button>
+        </div>
+        <canvas id="fitC" width="400" height="260"></canvas>
+        <div class="finfo" id="finfo"></div>
+      </div>
+    </div>
+    <div class="nav"><button class="bbk" onclick="go(1)">← Back</button><button class="bnx" id="n2" disabled>Next →</button></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div id="p3" class="panel hidden">
+    <div class="card">
+      <div class="ct">🎯 Set Resolution (DPI)</div>
+      <div class="drow">
+        <button class="dbtn" data-dpi="72">72 DPI<small>Screen</small></button>
+        <button class="dbtn" data-dpi="100">100 DPI<small>Banner</small></button>
+        <button class="dbtn" data-dpi="150">150 DPI<small>Draft</small></button>
+        <button class="dbtn sel" data-dpi="300">300 DPI<small>Standard ✓</small></button>
+        <button class="dbtn" data-dpi="600">600 DPI<small>High Quality</small></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px">
+        <label style="color:#555;font-size:.78rem">Custom:</label>
+        <input type="number" id="cdpi" placeholder="e.g. 200" min="1" max="1200" style="width:80px;padding:6px 8px;border-radius:6px;border:1px solid #282828;background:#0e0e0e;color:#ccc;font-size:.78rem">
+        <span style="color:#555;font-size:.78rem">DPI</span>
+      </div>
+      <div class="dinfo" style="margin-bottom:11px;background:rgba(0,229,255,.04);border-color:rgba(0,229,255,.15)">
+        <div style="font-size:.74rem;color:#4dd0e1;font-weight:600;margin-bottom:6px">💡 Recommended DPI by print type</div>
+        <div class="dr"><span>Documents, flyers, photos (viewed close)</span><span style="color:#ccc">300 DPI</span></div>
+        <div class="dr"><span>Posters (viewed 3–6 ft away)</span><span style="color:#ccc">150 DPI</span></div>
+        <div class="dr"><span>Banners, backdrops (viewed 6+ ft away)</span><span style="color:#ccc">72–100 DPI</span></div>
+      </div>
+      <div class="dinfo">
+        <div class="dr"><span>Selected DPI</span><span id="dv">300 DPI</span></div>
+        <div class="dr"><span>Output pixels (W × H)</span><span id="dpx">—</span></div>
+        <div class="dr"><span>Est. raw image size</span><span id="dfs">—</span></div>
+        <div class="dr"><span>Will export at</span><span id="dexp">—</span></div>
+      </div>
+      <div class="warn" id="dwarn"></div>
+      <div class="warn" id="dwarn2" style="background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.2);color:#4dd0e1"></div>
+    </div>
+    <div class="nav"><button class="bbk" onclick="go(2)">← Back</button><button class="bnx" onclick="go(4)">Next →</button></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div id="p4" class="panel hidden">
+    <div class="card">
+      <div class="ct">🎨 RGB → CMYK Conversion</div>
+      <div class="proc" id="proc"><div class="spin"></div><p>Converting to CMYK ink channels…</p></div>
+      <div id="cmykRes" class="hidden">
+        <div class="channels">
+          <div class="chwrap"><canvas id="chC"></canvas><div class="chl c-c">C — Cyan</div></div>
+          <div class="chwrap"><canvas id="chM"></canvas><div class="chl c-m">M — Magenta</div></div>
+          <div class="chwrap"><canvas id="chY"></canvas><div class="chl c-y">Y — Yellow</div></div>
+          <div class="chwrap"><canvas id="chK"></canvas><div class="chl c-k">K — Black</div></div>
+          <div class="chwrap"><canvas id="chCo"></canvas><div class="chl c-comp">Composite</div></div>
+        </div>
+        <p style="font-size:.68rem;color:#444;margin-top:9px;text-align:center">Darker = more ink · Each channel = one printing plate · Export PDF uses true DeviceCMYK colorspace</p>
+        <div class="warn" style="display:block;background:rgba(255,152,0,.07);border-color:rgba(255,152,0,.2);color:#ffb74d;margin-top:10px">
+          ⚠ RGB → CMYK conversion narrows the color gamut. Bright/saturated colors — especially neon greens, electric blues, and vivid oranges — may look duller or shift slightly when actually printed. This preview approximates that shift, but real results vary by printer and paper.
+        </div>
+      </div>
+    </div>
+    <div class="nav"><button class="bbk" onclick="go(3)">← Back</button><button class="bnx" id="n4" disabled onclick="go(5)">Next →</button></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div id="p5" class="panel hidden">
+    <div class="card">
+      <div class="ct">💾 Export Print File</div>
+      <div class="esum" id="esum"></div>
+      <div style="margin-bottom:11px">
+        <div style="color:#555;font-size:.72rem;margin-bottom:6px">Format</div>
+        <div class="fmts">
+          <button class="fbtn sel" data-f="pdf">PDF (CMYK)</button>
+          <button class="fbtn" data-f="tif">TIFF (CMYK)</button>
+        </div>
+      </div>
+      <button class="expbtn" id="expBtn">⬇ Generate Print File</button>
+      <p class="expnote">True DeviceCMYK · Correct physical dimensions · Press-ready</p>
+      <div class="exout" id="exout"></div>
+      <button class="bbk" id="newImgBtn" style="width:100%;margin-top:12px;display:none">🔄 Start New Image</button>
+    </div>
+    <div class="nav"><button class="bbk" onclick="go(4)">← Back</button><div style="width:70px"></div></div>
+  </div>
+</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────
+const FT=304.8,IN=25.4,CM=10;
+const SIZES={
+  std:[
+    {n:'A3',w:297,h:420,d:'297×420 mm'},{n:'A4',w:210,h:297,d:'210×297 mm'},
+    {n:'A5',w:148,h:210,d:'148×210 mm'},{n:'A6',w:105,h:148,d:'105×148 mm'},
+    {n:'Letter',w:215.9,h:279.4,d:'8.5×11 in'},{n:'Legal',w:215.9,h:355.6,d:'8.5×14 in'},
+    {n:'Tabloid',w:279.4,h:431.8,d:'11×17 in'},
+  ],
+  ban:[
+    {n:'Roll-up 2.5×6.5',w:2.5*FT,h:6.5*FT,d:'2.5×6.5 ft'},
+    {n:'Roll-up 3×7',w:3*FT,h:7*FT,d:'3×7 ft'},
+    {n:'Vinyl 3×6',w:3*FT,h:6*FT,d:'3×6 ft'},
+    {n:'Vinyl 4×8',w:4*FT,h:8*FT,d:'4×8 ft'},
+    {n:'Vinyl 5×10',w:5*FT,h:10*FT,d:'5×10 ft'},
+    {n:'Vinyl 6×12',w:6*FT,h:12*FT,d:'6×12 ft'},
+    {n:'Backdrop 8×8',w:8*FT,h:8*FT,d:'8×8 ft'},
+    {n:'Backdrop 10×8',w:10*FT,h:8*FT,d:'10×8 ft'},
+    {n:'Backdrop 12×8',w:12*FT,h:8*FT,d:'12×8 ft'},
+    {n:'Step-Repeat 8×8',w:8*FT,h:8*FT,d:'8×8 ft'},
+    {n:'Step-Repeat 10×10',w:10*FT,h:10*FT,d:'10×10 ft'},
+  ]
+};
+
+// ── State ─────────────────────────────────────────────────────
+const S={step:1,img:null,size:null,sName:'',dpi:300,orient:'portrait',fitMode:'fit',fmt:'pdf'};
+
+// ── Byte utils ────────────────────────────────────────────────
+function sb(s){const b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i)&0xff;return b;}
+function jb(...a){const t=a.reduce((s,x)=>s+x.length,0),o=new Uint8Array(t);let p=0;for(const x of a){o.set(x,p);p+=x.length;}return o;}
+function arr2b64(arr){let s='';const c=8192;for(let i=0;i<arr.length;i+=c)s+=String.fromCharCode(...arr.subarray(i,Math.min(i+c,arr.length)));return btoa(s);}
+
+// ── Color conversion ──────────────────────────────────────────
+function rgbCmyk(r,g,b){
+  const r1=r/255,g1=g/255,b1=b/255,k=1-Math.max(r1,g1,b1);
+  if(k>=1)return[0,0,0,1];
+  const d=1-k;
+  return[(1-r1-k)/d,(1-g1-k)/d,(1-b1-k)/d,k];
+}
+
+// ── True CMYK PDF builder ─────────────────────────────────────
+// Writes raw PDF with /DeviceCMYK colorspace — not RGB!
+function buildCMYKPdf(canvas, wMM, hMM){
+  const w=canvas.width, h=canvas.height;
+  const px=canvas.getContext('2d').getImageData(0,0,w,h).data;
+
+  // RGB → 8-bit CMYK
+  const raw=new Uint8Array(w*h*4);
+  for(let i=0,j=0;i<px.length;i+=4,j+=4){
+    const[c,m,y,k]=rgbCmyk(px[i],px[i+1],px[i+2]);
+    raw[j]=c*255+.5|0; raw[j+1]=m*255+.5|0;
+    raw[j+2]=y*255+.5|0; raw[j+3]=k*255+.5|0;
+  }
+
+  // Compress CMYK data
+  const imgZ=pako.deflate(raw);
+
+  // Page size in PDF points (1pt = 1/72 inch)
+  const pt=v=>(v*72/25.4).toFixed(3);
+  const wPt=pt(wMM), hPt=pt(hMM);
+
+  // Content stream: scale image to fill page
+  const cs=`q ${wPt} 0 0 ${hPt} 0 0 cm /Im0 Do Q`;
+
+  // PDF object strings
+  const o1=`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`;
+  const o2=`2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`;
+  const o3=`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${wPt} ${hPt}] /Contents 4 0 R /Resources << /XObject << /Im0 5 0 R >> >> >>\nendobj\n`;
+  const o4=`4 0 obj\n<< /Length ${cs.length} >>\nstream\n${cs}\nendstream\nendobj\n`;
+  // *** /ColorSpace /DeviceCMYK — this makes it a true CMYK PDF ***
+  const o5h=`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceCMYK /BitsPerComponent 8 /Filter /FlateDecode /Length ${imgZ.length} >>\nstream\n`;
+  const o5f=`\nendstream\nendobj\n`;
+
+  const hdr=sb('%PDF-1.4\n');
+  const b1=sb(o1),b2=sb(o2),b3=sb(o3),b4=sb(o4),b5h=sb(o5h),b5f=sb(o5f);
+
+  // Compute byte offsets for xref table
+  const xo=[0,0,0,0,0,0];
+  let pos=hdr.length;
+  xo[1]=pos; pos+=b1.length;
+  xo[2]=pos; pos+=b2.length;
+  xo[3]=pos; pos+=b3.length;
+  xo[4]=pos; pos+=b4.length;
+  xo[5]=pos; pos+=b5h.length+imgZ.length+b5f.length;
+
+  const p10=n=>String(n).padStart(10,'0');
+  const xref=`xref\n0 6\n0000000000 65535 f\r\n${p10(xo[1])} 00000 n\r\n${p10(xo[2])} 00000 n\r\n${p10(xo[3])} 00000 n\r\n${p10(xo[4])} 00000 n\r\n${p10(xo[5])} 00000 n\r\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${pos}\n%%EOF`;
+
+  return jb(hdr,b1,b2,b3,b4,b5h,imgZ,b5f,sb(xref));
+}
+
+// ── True CMYK TIFF builder (uncompressed, 4 channel, opens in Photoshop) ──
+function buildCMYKTiff(canvas, dpi){
+  const w=canvas.width, h=canvas.height;
+  const px=canvas.getContext('2d').getImageData(0,0,w,h).data;
+  const raw=new Uint8Array(w*h*4);
+  for(let i=0,j=0;i<px.length;i+=4,j+=4){
+    const[c,m,y,k]=rgbCmyk(px[i],px[i+1],px[i+2]);
+    raw[j]=c*255+.5|0; raw[j+1]=m*255+.5|0;
+    raw[j+2]=y*255+.5|0; raw[j+3]=k*255+.5|0;
+  }
+
+  const numTags=11;
+  const headerSize=8;
+  const ifdOffset=headerSize;
+  const ifdSize=2+numTags*12+4;
+  // Extra data block (after IFD): BitsPerSample[4] (8 bytes) + XRes(8) + YRes(8)
+  const bpsOffset=ifdOffset+ifdSize;
+  const xresOffset=bpsOffset+8;
+  const yresOffset=xresOffset+8;
+  const dataOffset=yresOffset+8;
+
+  const buf=new ArrayBuffer(dataOffset+raw.length);
+  const dv=new DataView(buf);
+  dv.setUint16(0,0x4949,true); // little-endian
+  dv.setUint16(2,42,true);
+  dv.setUint32(4,ifdOffset,true);
+
+  let p=ifdOffset;
+  dv.setUint16(p,numTags,true); p+=2;
+  function tag(id,type,count,val){
+    dv.setUint16(p,id,true);
+    dv.setUint16(p+2,type,true);
+    dv.setUint32(p+4,count,true);
+    if(type===3&&count===1) dv.setUint16(p+8,val,true);
+    else dv.setUint32(p+8,val,true);
+    p+=12;
+  }
+  tag(256,3,1,w);              // ImageWidth
+  tag(257,3,1,h);              // ImageLength
+  tag(258,3,4,bpsOffset);      // BitsPerSample -> array of 4
+  tag(259,3,1,1);              // Compression: none
+  tag(262,3,1,5);              // Photometric: CMYK
+  tag(273,4,1,dataOffset);     // StripOffsets
+  tag(277,3,1,4);              // SamplesPerPixel
+  tag(278,3,1,h);              // RowsPerStrip
+  tag(279,4,1,raw.length);     // StripByteCounts
+  tag(282,5,1,xresOffset);     // XResolution
+  tag(283,5,1,yresOffset);     // YResolution
+  dv.setUint32(p,0,true); p+=4; // next IFD = 0
+
+  // BitsPerSample array: 8,8,8,8
+  dv.setUint16(bpsOffset,8,true);
+  dv.setUint16(bpsOffset+2,8,true);
+  dv.setUint16(bpsOffset+4,8,true);
+  dv.setUint16(bpsOffset+6,8,true);
+  // XResolution rational: dpi/1
+  dv.setUint32(xresOffset,dpi,true); dv.setUint32(xresOffset+4,1,true);
+  dv.setUint32(yresOffset,dpi,true); dv.setUint32(yresOffset+4,1,true);
+
+  new Uint8Array(buf,dataOffset).set(raw);
+  return new Uint8Array(buf);
+}
+
+// ── Apply fit mode to canvas ──────────────────────────────────
+function applyFit(canvas, img, mode){
+  const cw=canvas.width, ch=canvas.height;
+  const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,cw,ch);
+  let dx=0,dy=0,dw=cw,dh=ch,sx=0,sy=0,sw=iw,sh=ih;
+  if(mode==='fit'){
+    const ar=iw/ih,par=cw/ch;
+    if(ar>par){dh=cw/ar|0;dy=(ch-dh)/2;}
+    else{dw=ch*ar|0;dx=(cw-dw)/2;}
+  } else if(mode==='fill'){
+    const ar=iw/ih,par=cw/ch;
+    if(ar>par){sw=ih*par|0;sx=(iw-sw)/2;}
+    else{sh=iw/par|0;sy=(ih-sh)/2;}
+  }
+  ctx.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
+}
+
+// ── Nav ───────────────────────────────────────────────────────
+function go(n){
+  document.getElementById('p'+S.step).classList.add('hidden');
+  S.step=n;
+  document.getElementById('p'+n).classList.remove('hidden');
+  document.querySelectorAll('.sdot').forEach(el=>{
+    const s=+el.dataset.s;
+    el.classList.toggle('active',s===n);
+    el.classList.toggle('done',s<n);
+  });
+  if(n===4)doCMYK();
+  if(n===5)buildSummary();
+}
+
+// ── Step 1: Upload ────────────────────────────────────────────
+const fi=document.getElementById('fi');
+const drop=document.getElementById('drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])loadF(e.dataTransfer.files[0])});
+fi.addEventListener('change',e=>loadF(e.target.files[0]));
+
+function loadF(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const url=e.target.result;
+    const img=new Image();
+    img.onload=()=>{
+      S.img=img;
+      const p=document.getElementById('prevImg');
+      p.src=url; p.style.display='block';
+      document.getElementById('dprompt').style.display='none';
+      const m=document.getElementById('meta'); m.style.display='block';
+      document.getElementById('mName').textContent=file.name;
+      document.getElementById('mDim').textContent=img.naturalWidth+' × '+img.naturalHeight+' px';
+      document.getElementById('mSz').textContent=(file.size/1024).toFixed(0)+' KB';
+      document.getElementById('n1').disabled=false;
+    };
+    img.src=url;
+  };
+  r.readAsDataURL(file);
+}
+document.getElementById('n1').onclick=()=>S.img&&go(2);
+
+// ── Step 2: Size ──────────────────────────────────────────────
+function buildGrid(sizes,id){
+  const g=document.getElementById(id); g.innerHTML='';
+  sizes.forEach(sz=>{
+    const b=document.createElement('button');
+    b.className='sbtn';
+    b.innerHTML=`<span class="sn">${sz.n}</span><span class="sd">${sz.d}</span>`;
+    b.onclick=()=>{
+      document.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      S.size={w:sz.w,h:sz.h}; S.sName=sz.n;
+      document.getElementById('n2').disabled=false;
+      showFit(); updDpi();
+    };
+    g.appendChild(b);
+  });
+}
+buildGrid(SIZES.std,'stdG');
+buildGrid(SIZES.ban,'banG');
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    ['std','ban','cus'].forEach(c=>document.getElementById('cat-'+c).classList.add('hidden'));
+    document.getElementById('cat-'+t.dataset.cat).classList.remove('hidden');
+    if(t.dataset.cat==='cus')listenCustom();
+  };
+});
+
+function listenCustom(){
+  const chk=()=>{
+    const w=+document.getElementById('cW').value,h=+document.getElementById('cH').value;
+    const u=document.getElementById('cU').value;
+    if(!w||!h)return;
+    const f={mm:1,in:IN,cm:CM,ft:FT}[u];
+    S.size={w:w*f,h:h*f}; S.sName=`Custom ${w}×${h} ${u}`;
+    document.getElementById('n2').disabled=false;
+    showFit(); updDpi();
+  };
+  ['cW','cH','cU'].forEach(id=>document.getElementById(id).addEventListener('input',chk));
+}
+
+document.getElementById('oP').onclick=()=>{S.orient='portrait';selO('oP','oL');showFit();updDpi()};
+document.getElementById('oL').onclick=()=>{S.orient='landscape';selO('oL','oP');showFit();updDpi()};
+function selO(a,b){document.getElementById(a).classList.add('sel');document.getElementById(b).classList.remove('sel')}
+
+document.querySelectorAll('.fmbtn').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.fmbtn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.fitMode=b.dataset.fm;showFit();}
+});
+
+document.getElementById('n2').onclick=()=>go(3);
+
+function pageWH(){
+  let w=S.size.w,h=S.size.h;
+  if(S.orient==='landscape'&&w<h)[w,h]=[h,w];
+  if(S.orient==='portrait'&&w>h)[w,h]=[h,w];
+  return{w,h};
+}
+
+function showFit(){
+  if(!S.size||!S.img)return;
+  document.getElementById('fp').style.display='block';
+  const fc=document.getElementById('fitC');
+  const ctx=fc.getContext('2d');
+  const cw=fc.width=400,ch=fc.height=260;
+  const{w:pw,h:ph}=pageWH();
+  const pad=24;
+  const sc=Math.min((cw-pad*2)/pw,(ch-pad*2)/ph);
+  const rw=pw*sc|0,rh=ph*sc|0;
+  const rx=(cw-rw)/2,ry=(ch-rh)/2;
+
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,cw,ch);
+  ctx.shadowColor='rgba(0,0,0,.7)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5;
+  ctx.fillStyle='#fff'; ctx.fillRect(rx,ry,rw,rh);
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // Draw image with fit mode
+  const iw=S.img.naturalWidth,ih=S.img.naturalHeight;
+  let dx=rx,dy=ry,dw=rw,dh=rh,sx=0,sy=0,sw=iw,sh=ih;
+  if(S.fitMode==='fit'){
+    const ar=iw/ih,par=rw/rh;
+    if(ar>par){dh=rw/ar|0;dy=ry+(rh-dh)/2;}
+    else{dw=rh*ar|0;dx=rx+(rw-dw)/2;}
+  } else if(S.fitMode==='fill'){
+    const ar=iw/ih,par=rw/rh;
+    if(ar>par){sw=ih*par|0;sx=(iw-sw)/2;}
+    else{sh=iw/par|0;sy=(ih-sh)/2;}
+  }
+  ctx.save();ctx.beginPath();ctx.rect(rx,ry,rw,rh);ctx.clip();
+  ctx.drawImage(S.img,sx,sy,sw,sh,dx,dy,dw,dh);
+  ctx.restore();
+
+  // Border
+  ctx.strokeStyle='rgba(0,229,255,.4)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(rx,ry,rw,rh);
+
+  // Labels
+  ctx.fillStyle='rgba(0,229,255,.75)'; ctx.font='bold 10px Segoe UI';
+  const wL=pw>=1000?(pw/FT).toFixed(1)+' ft':Math.round(pw)+' mm';
+  const hL=ph>=1000?(ph/FT).toFixed(1)+' ft':Math.round(ph)+' mm';
+  ctx.textAlign='center'; ctx.fillText(wL,cw/2,ry-6);
+  ctx.save();ctx.translate(rx-8,ch/2);ctx.rotate(-Math.PI/2);ctx.fillText(hL,0,0);ctx.restore();
+
+  const mL={'fit':'Fit to Page','fill':'Fill Page','stretch':'Stretch'}[S.fitMode];
+  document.getElementById('finfo').textContent=`${mL} · Image: ${iw}×${ih}px → ${Math.round(pw)}×${Math.round(ph)} mm`;
+}
+
+// ── Step 3: DPI ───────────────────────────────────────────────
+function outPx(){
+  if(!S.size)return null;
+  const{w,h}=pageWH();
+  return{wPx:w/IN*S.dpi|0,hPx:h/IN*S.dpi|0,wMM:w,hMM:h};
+}
+
+function updDpi(){
+  const o=outPx(); if(!o)return;
+  document.getElementById('dv').textContent=S.dpi+' DPI';
+  document.getElementById('dpx').textContent=o.wPx.toLocaleString()+' × '+o.hPx.toLocaleString()+' px';
+  document.getElementById('dfs').textContent='~'+(o.wPx*o.hPx*4/1e6).toFixed(1)+' MB (4ch CMYK)';
+
+  const EXPORT_MAX=12000;
+  const longEdge=Math.max(o.wPx,o.hPx);
+  const expEl=document.getElementById('dexp');
+  const w=document.getElementById('dwarn');
+  const w2=document.getElementById('dwarn2');
+
+  if(longEdge>EXPORT_MAX){
+    const ratio=EXPORT_MAX/longEdge;
+    const expW=Math.round(o.wPx*ratio), expH=Math.round(o.hPx*ratio);
+    const maxDpiForSize=Math.floor(S.dpi*ratio);
+    expEl.textContent=expW.toLocaleString()+' × '+expH.toLocaleString()+' px (capped)';
+    expEl.style.color='#ff9800';
+    w.textContent=`⚠ Your selected size + DPI needs ${longEdge.toLocaleString()}px, but this tool supports up to 12,000px on the longest side. Your export will be scaled down to ${Math.max(expW,expH).toLocaleString()}px — effectively ~${maxDpiForSize} DPI at this size. For full ${S.dpi} DPI at this print size, use a tool that supports higher resolution, or reduce the DPI / print size.`;
+    w.style.display='block';
+  } else {
+    expEl.textContent=o.wPx.toLocaleString()+' × '+o.hPx.toLocaleString()+' px (full resolution)';
+    expEl.style.color='#00c853';
+    w.style.display='none';
+  }
+
+  if(o.wPx*o.hPx>40e6 || longEdge>6000){
+    w2.textContent='⚠ Large exports may use significant memory and could be slow on older devices or mobile browsers. Keep this tab active while generating.';
+    w2.style.display='block';
+  } else {
+    w2.style.display='none';
+  }
+}
+updDpi();
+
+document.querySelectorAll('.dbtn').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.dpi=+b.dataset.dpi;document.getElementById('cdpi').value='';updDpi();};
+});
+document.getElementById('cdpi').addEventListener('input',e=>{
+  const v=+e.target.value;if(v>0){S.dpi=v;document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('sel'));updDpi();}
+});
+
+// ── Step 4: CMYK Preview ──────────────────────────────────────
+function procImg(el,maxPx){
+  const sc=Math.min(1,maxPx/Math.max(el.naturalWidth,el.naturalHeight));
+  const w=el.naturalWidth*sc|0, h=el.naturalHeight*sc|0;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(el,0,0,w,h);
+  const px=c.getContext('2d').getImageData(0,0,w,h).data;
+  const out=new Float32Array(w*h*4);
+  for(let i=0,j=0;i<px.length;i+=4,j+=4){
+    const[cc,m,y,k]=rgbCmyk(px[i],px[i+1],px[i+2]);
+    out[j]=cc;out[j+1]=m;out[j+2]=y;out[j+3]=k;
+  }
+  return{px:out,w,h};
+}
+
+function drawCh(data,ch,canvas,tint){
+  const{px,w,h}=data; canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d'),id=ctx.createImageData(w,h),d=id.data;
+  for(let i=0,j=0;i<w*h;i++,j+=4){
+    const ink=px[i*4+ch];
+    d[j]=255+(tint[0]-255)*ink+.5|0;
+    d[j+1]=255+(tint[1]-255)*ink+.5|0;
+    d[j+2]=255+(tint[2]-255)*ink+.5|0;
+    d[j+3]=255;
+  }
+  ctx.putImageData(id,0,0);
+}
+
+function drawComp(data,canvas){
+  const{px,w,h}=data; canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d'),id=ctx.createImageData(w,h),d=id.data;
+  for(let i=0,j=0;i<w*h;i++,j+=4){
+    const c=px[i*4],m=px[i*4+1],y=px[i*4+2],k=px[i*4+3];
+    d[j]=255*(1-c)*(1-k)+.5|0;
+    d[j+1]=255*(1-m)*(1-k)+.5|0;
+    d[j+2]=255*(1-y)*(1-k)+.5|0;
+    d[j+3]=255;
+  }
+  ctx.putImageData(id,0,0);
+}
+
+function doCMYK(){
+  document.getElementById('proc').classList.remove('hidden');
+  document.getElementById('cmykRes').classList.add('hidden');
+  document.getElementById('n4').disabled=true;
+  setTimeout(()=>{
+    const prev=procImg(S.img,480);
+    drawCh(prev,0,document.getElementById('chC'),[0,255,255]);
+    drawCh(prev,1,document.getElementById('chM'),[255,0,255]);
+    drawCh(prev,2,document.getElementById('chY'),[255,255,0]);
+    drawCh(prev,3,document.getElementById('chK'),[0,0,0]);
+    drawComp(prev,document.getElementById('chCo'));
+    document.getElementById('proc').classList.add('hidden');
+    document.getElementById('cmykRes').classList.remove('hidden');
+    document.getElementById('n4').disabled=false;
+  },80);
+}
+
+// ── Step 5: Export ────────────────────────────────────────────
+function buildSummary(){
+  const o=outPx(); if(!o)return;
+  const items=[
+    ['Print Size',S.sName],['W × H',Math.round(o.wMM)+' × '+Math.round(o.hMM)+' mm'],
+    ['Resolution',S.dpi+' DPI'],['Output Pixels',o.wPx.toLocaleString()+' × '+o.hPx.toLocaleString()],
+    ['Color Mode','CMYK (DeviceCMYK)'],['Fit Mode',{fit:'Fit to Page',fill:'Fill Page',stretch:'Stretch'}[S.fitMode]],
+  ];
+  document.getElementById('esum').innerHTML=items.map(([l,v])=>`<div class="ei"><div class="el">${l}</div><div class="ev">${v}</div></div>`).join('');
+}
+
+document.querySelectorAll('.fbtn').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.fmt=b.dataset.f;};
+});
+
+document.getElementById('expBtn').onclick=async()=>{
+  const btn=document.getElementById('expBtn');
+  btn.disabled=true; btn.textContent='⏳ Building CMYK file…';
+  await new Promise(r=>setTimeout(r,60));
+
+  try{
+    const o=outPx();
+    const MAX=12000;
+    const sc=Math.min(1,MAX/Math.max(o.wPx,o.hPx));
+    const ew=o.wPx*sc|0, eh=o.hPx*sc|0;
+
+    // Export canvas — apply fit mode using ORIGINAL image (single CMYK conversion)
+    const ec=document.createElement('canvas');
+    ec.width=ew; ec.height=eh;
+    applyFit(ec,S.img,S.fitMode);
+
+    const fname=S.sName.replace(/[\s\/]/g,'_')+'_'+S.dpi+'dpi';
+    const out=document.getElementById('exout');
+    out.innerHTML=''; out.style.display='block';
+
+    if(S.fmt==='pdf'){
+      btn.textContent='⏳ Converting CMYK + compressing…';
+      await new Promise(r=>setTimeout(r,10));
+
+      const pdfBytes=buildCMYKPdf(ec,o.wMM,o.hMM);
+      const blob=new Blob([pdfBytes],{type:'application/pdf'});
+      const dlURL=URL.createObjectURL(blob);
+
+      const a=document.createElement('a');
+      a.href=dlURL; a.download=fname+'_CMYK.pdf'; a.className='dl-btn';
+      a.textContent='⬇ Download '+fname+'_CMYK.pdf';
+      out.appendChild(a);
+
+      const tag=document.createElement('p');
+      tag.style.cssText='font-size:.68rem;color:#444;margin-top:8px';
+      tag.textContent='✓ True /DeviceCMYK colorspace PDF — verify in Acrobat → Output Preview';
+      out.appendChild(tag);
+
+    } else {
+      btn.textContent='⏳ Building CMYK TIFF…';
+      await new Promise(r=>setTimeout(r,10));
+
+      const tiffBytes=buildCMYKTiff(ec,S.dpi);
+      const blob=new Blob([tiffBytes],{type:'image/tiff'});
+      const dlURL=URL.createObjectURL(blob);
+
+      const a=document.createElement('a');
+      a.href=dlURL; a.download=fname+'_CMYK.tif'; a.className='dl-btn';
+      a.textContent='⬇ Download '+fname+'_CMYK.tif';
+      out.appendChild(a);
+
+      const tag=document.createElement('p');
+      tag.style.cssText='font-size:.68rem;color:#444;margin-top:8px';
+      tag.textContent='✓ Real 4-channel CMYK TIFF (uncompressed) — opens directly in Photoshop as CMYK Color mode';
+      out.appendChild(tag);
+    }
+  }catch(e){
+    const err=document.createElement('p');
+    err.style.cssText='color:#ff4081;font-size:.8rem;margin-top:8px';
+    err.textContent='Error: '+e.message;
+    document.getElementById('exout').appendChild(err);
+  }
+  btn.disabled=false; btn.innerHTML='⬇ Generate Print File';
+  document.getElementById('newImgBtn').style.display='block';
+};
+
+document.getElementById('newImgBtn').onclick=()=>{
+  // reset state
+  S.step=1; S.img=null; S.size=null; S.sName=''; S.dpi=300; S.orient='portrait'; S.fitMode='fit'; S.fmt='pdf';
+  document.getElementById('prevImg').style.display='none';
+  document.getElementById('dprompt').style.display='block';
+  document.getElementById('meta').style.display='none';
+  document.getElementById('n1').disabled=true;
+  document.getElementById('fi').value='';
+  document.getElementById('exout').innerHTML=''; document.getElementById('exout').style.display='none';
+  document.getElementById('newImgBtn').style.display='none';
+  document.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('sel'));
+  document.getElementById('n2').disabled=true;
+  document.getElementById('fp').style.display='none';
+  document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('sel'));
+  document.querySelector('.dbtn[data-dpi="300"]').classList.add('sel');
+  document.getElementById('cdpi').value='';
+  document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('sel'));
+  document.querySelector('.fbtn[data-f="pdf"]').classList.add('sel');
+  document.querySelectorAll('.sdot').forEach(el=>{
+    const s=+el.dataset.s; el.classList.toggle('active',s===1); el.classList.remove('done');
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('p1').classList.remove('hidden');
+};
+</script>
+</body>
+</html>

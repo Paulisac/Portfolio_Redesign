@@ -30,14 +30,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HX2F60BT5L"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-HX2F60BT5L');
-</script>
+  <!-- Google tag (gtag.js) - load only in non-local environments to avoid dev errors -->
+  <script>
+    try{
+      if(location && location.hostname && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-HX2F60BT5L';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);} window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-HX2F60BT5L');
+      }
+    }catch(e){ console.warn('gtag load skipped (dev):', e) }
+  </script>
 
 </head>
 <body>

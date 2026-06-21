@@ -31,6 +31,7 @@ export default function Navigation() {
           <ul className="nav-links">
             <li><Link to="/">Home</Link></li>
             <li><a href="#work" onClick={(e) => { e.preventDefault(); scrollToSection('work'); }}>Work</a></li>
+            <li><a href="#tools" onClick={(e) => { e.preventDefault(); scrollToSection('tools'); }}>Tools</a></li>
             <li><a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}>About</a></li>
           </ul>
           <button 
@@ -45,6 +46,7 @@ export default function Navigation() {
       <div className={`nav-drawer ${drawerOpen ? 'open' : ''}`}>
         <Link to="/" onClick={() => setDrawerOpen(false)}>Home</Link>
         <a href="#work" onClick={(e) => { e.preventDefault(); scrollToSection('work'); }}>Work</a>
+        <a href="#tools" onClick={(e) => { e.preventDefault(); scrollToSection('tools'); }}>Tools</a>
         <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }}>About</a>
       </div>
     </>

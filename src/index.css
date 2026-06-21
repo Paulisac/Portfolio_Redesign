@@ -637,6 +637,7 @@ footer {
   body { font-size:15px; }
   .nav-links { display:none; }
   .nav-hamburger { display:flex; }
+  .nav-hamburger span { background: #000; }
   .hero { padding-top:5.5rem; min-height:auto; padding-bottom:3rem; }
   .hero-inner { gap:2rem; }
   .section { padding:4.5rem 1.5rem; }
