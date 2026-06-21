@@ -1,4 +1,5 @@
 import React from 'react'
+import { Helmet } from 'react-helmet-async'
 import Navigation from '../../components/Navigation'
 import Footer from '../../components/Footer'
 import ScrollToTop from '../../components/ScrollToTop'
@@ -8,6 +9,14 @@ import PrintPrepTool from '../../components/tools/PrintPrepTool'
 export default function AIPrintPreparation() {
   return (
     <>
+      <Helmet>
+        <title>AI Print Preparation Assistant — Tools · Paul Isac</title>
+        <meta name="description" content="AI assistant to prepare artwork for print: DPI analysis, CMYK conversion preview, and press-ready PDF/TIFF export." />
+        <meta property="og:title" content="AI Print Preparation Assistant — Paul Isac" />
+        <meta property="og:description" content="Prepare artwork for print with DPI checks, CMYK preview, and press-ready export." />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://paulisac.com/tools/ai-print-preparation-assistant" />
+      </Helmet>
       <Navigation />
       <ScrollToTop />
 

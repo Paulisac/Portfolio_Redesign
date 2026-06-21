@@ -1,4 +1,5 @@
 import React from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useParams, Link, Navigate } from 'react-router-dom'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
@@ -16,6 +17,15 @@ export default function CaseStudy() {
 
   return (
     <>
+      <Helmet>
+        <title>{project.title} — {project.client} · Paul Isac</title>
+        <meta name="description" content={project.shortDescription} />
+        <meta property="og:title" content={`${project.title} — ${project.client}`} />
+        <meta property="og:description" content={project.shortDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content={project.thumbnail || 'https://paulisac.com/og.png'} />
+        <link rel="canonical" href={`https://paulisac.com/work/${project.id}`} />
+      </Helmet>
       <Navigation />
       <ScrollToTop />
 

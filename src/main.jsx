@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import { HelmetProvider } from 'react-helmet-async'
 
 // Filter out known non-actionable development warnings (React Router future flags)
 const _warn = console.warn.bind(console)
@@ -15,6 +16,8 @@ console.warn = (...args) => {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </React.StrictMode>
 )
